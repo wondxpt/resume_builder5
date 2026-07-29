@@ -15,53 +15,75 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11.7"
 
-      - name: Set up Java 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Verify environment
+      - name: Verify Python and Java
         run: |
           python --version
+          python -m pip --version
           java -version
-          javac -version
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git \
+            zip \
+            unzip \
+            openjdk-17-jdk \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libtinfo5 \
+            cmake
 
       - name: Install Python build tools
         run: |
           python -m pip install --upgrade pip
           python -m pip install setuptools wheel
-          python -m pip install "cython<3"
-          python -m pip install buildozer
+          python -m pip install buildozer==1.5.0
+          python -m pip install python-for-android
+
+      - name: Clean previous Buildozer files
+        run: |
+          rm -rf .buildozer
+          rm -rf bin
 
       - name: Check project files
         run: |
           echo "Project files:"
           ls -la
-          echo "Checking required files..."
+          echo ""
+          echo "Checking main.py:"
           test -f main.py
+          echo ""
+          echo "Checking buildozer.spec:"
           test -f buildozer.spec
-          test -f requirements.txt
+          echo ""
+          echo "Python version:"
+          python --version
 
       - name: Build APK
         env:
-          P4A_RELEASE_CHANNEL: stable
+          JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
-          yes | buildozer android clean || true
-          yes | buildozer -v android debug
-
-      - name: Find APK
-        run: |
-          echo "APK files:"
-          find bin -type f -name "*.apk" -print
+          buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ResumeBuilder-APK
+          name: resume-builder-apk
           path: bin/*.apk
           if-no-files-found: error
