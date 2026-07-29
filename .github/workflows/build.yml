@@ -1,145 +1,67 @@
- name: Build Resume Builder APK
+name: Build Resume Builder APK
 
 on:
-workflow_dispatch:
-push:
-branches:
-- main
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-build-apk:
-runs-on: ubuntu-22.04
+  build-apk:
+    runs-on: ubuntu-22.04
 
-steps:
-  - name: Checkout repository
-    uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  - name: Setup Python 3.11
-    uses: actions/setup-python@v6
-    with:
-      python-version: "3.11.7"
-      cache: pip
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11.7"
 
-  - name: Setup Java 17
-    uses: actions/setup-java@v4
-    with:
-      distribution: temurin
-      java-version: "17"
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
-  - name: Verify Java and Python
-    run: |
-      java -version
-      javac -version
-      python --version
-      pip --version
+      - name: Verify environment
+        run: |
+          python --version
+          java -version
+          javac -version
 
-  - name: Install system dependencies
-    run: |
-      sudo apt-get update
-      sudo apt-get install -y \
-        git \
-        zip \
-        unzip \
-        wget \
-        curl \
-        autoconf \
-        automake \
-        libtool \
-        pkg-config \
-        zlib1g-dev \
-        libncurses5-dev \
-        libncursesw5-dev \
-        libtinfo5 \
-        cmake \
-        libffi-dev \
-        libssl-dev
+      - name: Install Python build tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install setuptools wheel
+          python -m pip install "cython<3"
+          python -m pip install buildozer
 
-  - name: Install Android command line tools
-    run: |
-      mkdir -p "$HOME/android-sdk/cmdline-tools"
-      cd "$HOME/android-sdk"
+      - name: Check project files
+        run: |
+          echo "Project files:"
+          ls -la
+          echo "Checking required files..."
+          test -f main.py
+          test -f buildozer.spec
+          test -f requirements.txt
 
-      wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+      - name: Build APK
+        env:
+          P4A_RELEASE_CHANNEL: stable
+        run: |
+          yes | buildozer android clean || true
+          yes | buildozer -v android debug
 
-      unzip -q commandlinetools-linux-11076708_latest.zip -d cmdline-tools
+      - name: Find APK
+        run: |
+          echo "APK files:"
+          find bin -type f -name "*.apk" -print
 
-      mkdir -p cmdline-tools/latest
-      mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
-
-      rm -rf cmdline-tools/cmdline-tools
-      rm -f commandlinetools-linux-11076708_latest.zip
-
-  - name: Configure Android SDK
-    run: |
-      echo "ANDROID_HOME=$HOME/android-sdk" >> "$GITHUB_ENV"
-      echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> "$GITHUB_ENV"
-      echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-      echo "$HOME/android-sdk/platform-tools" >> "$GITHUB_PATH"
-      echo "$HOME/android-sdk/emulator" >> "$GITHUB_PATH"
-
-  - name: Accept Android licenses
-    env:
-      ANDROID_HOME: ${{ env.HOME }}/android-sdk
-      ANDROID_SDK_ROOT: ${{ env.HOME }}/android-sdk
-    run: |
-      yes | sdkmanager --licenses > /dev/null || true
-
-  - name: Install Android SDK packages
-    run: |
-      sdkmanager "platform-tools"
-      sdkmanager "platforms;android-34"
-      sdkmanager "build-tools;34.0.0"
-
-  - name: Verify Android SDK
-    run: |
-      echo "ANDROID_HOME=$ANDROID_HOME"
-      which sdkmanager
-      sdkmanager --version
-      adb version
-      ls -la "$ANDROID_HOME/platform-tools"
-      ls -la "$ANDROID_HOME/build-tools/34.0.0"
-
-  - name: Install Python build dependencies
-    run: |
-      python -m pip install --upgrade pip
-      python -m pip install setuptools wheel
-      python -m pip install "Cython==0.29.36"
-      python -m pip install virtualenv
-      python -m pip install buildozer==1.5.0
-
-  - name: Verify project files
-    run: |
-      echo "Project files:"
-      ls -la
-
-      test -f main.py
-      test -f buildozer.spec
-
-      echo "main.py found"
-      echo "buildozer.spec found"
-
-  - name: Build APK
-    env:
-      ANDROID_HOME: ${{ env.HOME }}/android-sdk
-      ANDROID_SDK_ROOT: ${{ env.HOME }}/android-sdk
-      JAVA_HOME: ${{ env.JAVA_HOME }}
-    run: |
-      java -version
-      python --version
-      buildozer --version
-
-      buildozer android clean || true
-      buildozer -v android debug
-
-  - name: Find APK
-    run: |
-      echo "Searching for APK..."
-      find . -type f -name "*.apk" -print
-
-  - name: Upload APK
-    uses: actions/upload-artifact@v4
-    with:
-      name: ResumeBuilder-APK
-      path: |
-        bin/*.apk
-      if-no-files-found: error
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ResumeBuilder-APK
+          path: bin/*.apk
+          if-no-files-found: error
