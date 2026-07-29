@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11.7"
@@ -25,15 +25,21 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Verify Python and Java
+      - name: Verify Java and Python
         run: |
+          echo "Python:"
           python --version
-          python -m pip --version
+
+          echo "Java:"
           java -version
+
+          echo "JAVA_HOME:"
+          echo "$JAVA_HOME"
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
+
           sudo apt-get install -y \
             git \
             zip \
@@ -52,36 +58,81 @@ jobs:
       - name: Install Python build tools
         run: |
           python -m pip install --upgrade pip
-          python -m pip install setuptools wheel
+          python -m pip install setuptools
+          python -m pip install wheel
+          python -m pip install "Cython==0.29.36"
           python -m pip install buildozer==1.5.0
           python -m pip install python-for-android
+
+          echo "Cython version:"
+          cython --version
+
+          echo "Buildozer version:"
+          buildozer --version
+
+          echo "Python-for-Android:"
+          python -m pythonforandroid.toolchain --help
+
+      - name: Check project files
+        run: |
+          echo "Current directory:"
+          pwd
+
+          echo ""
+          echo "Project files:"
+          find . -maxdepth 2 -type f | sort
+
+          echo ""
+          echo "Checking required files..."
+
+          test -f main.py
+          test -f buildozer.spec
+
+          echo "main.py found"
+          echo "buildozer.spec found"
 
       - name: Clean previous Buildozer files
         run: |
           rm -rf .buildozer
           rm -rf bin
 
-      - name: Check project files
-        run: |
-          echo "Project files:"
-          ls -la
-          echo ""
-          echo "Checking main.py:"
-          test -f main.py
-          echo ""
-          echo "Checking buildozer.spec:"
-          test -f buildozer.spec
-          echo ""
-          echo "Python version:"
-          python --version
+          echo "Old Buildozer files removed."
 
-      - name: Build APK
+      - name: Check Buildozer configuration
+        run: |
+          echo "===== buildozer.spec ====="
+          cat buildozer.spec
+          echo "===== end buildozer.spec ====="
+
+      - name: Build Android APK
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
+          export PATH="$JAVA_HOME/bin:$PATH"
+
+          echo "Java:"
+          java -version
+
+          echo "Python:"
+          python --version
+
+          echo "Cython:"
+          cython --version
+
+          echo "Starting Buildozer..."
+
           buildozer android debug
 
+      - name: List generated files
+        if: success()
+        run: |
+          echo "Build completed."
+          echo ""
+          echo "Contents of bin:"
+          ls -lah bin
+
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: resume-builder-apk
