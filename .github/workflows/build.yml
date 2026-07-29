@@ -14,10 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+      - name: Set up Python 3.11.7
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11.7"
+          cache: pip
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -25,40 +26,65 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Verify Java and Python
+        run: |
+          java -version
+          python --version
+          python -m pip --version
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             git \
-            zip \
+            wget \
             unzip \
+            zip \
+            tar \
             autoconf \
             automake \
             libtool \
             pkg-config \
+            cmake \
             zlib1g-dev \
             libncurses5-dev \
-            libncursesw5-dev \
-            libtinfo5 \
-            cmake
+            libncursesw5-dev
 
-      - name: Install Python tools
+      - name: Install Python build tools
         run: |
           python -m pip install --upgrade pip
           python -m pip install setuptools wheel
           python -m pip install "Cython==0.29.36"
-          python -m pip install buildozer==1.5.0
-          python -m pip install python-for-android
+          python -m pip install "buildozer==1.6.0"
+          python -m pip install "python-for-android==2026.5.9"
 
-      - name: Install Android SDK
+      - name: Verify project files
+        run: |
+          echo "Project directory:"
+          pwd
+
+          echo "Project files:"
+          ls -lah
+
+          test -f main.py
+          test -f buildozer.spec
+          test -f requirements.txt
+
+          echo "main.py: OK"
+          echo "buildozer.spec: OK"
+          echo "requirements.txt: OK"
+
+      - name: Install Android SDK command line tools
         run: |
           mkdir -p "$HOME/android-sdk/cmdline-tools"
 
           cd "$HOME"
 
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip
+          wget -q \
+            https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip \
+            -O commandlinetools.zip
 
-          unzip -q commandlinetools-linux-13114758_latest.zip \
+          unzip -q commandlinetools.zip \
             -d android-sdk/cmdline-tools
 
           mv android-sdk/cmdline-tools/cmdline-tools \
@@ -66,55 +92,68 @@ jobs:
 
           echo "ANDROID_HOME=$HOME/android-sdk" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> "$GITHUB_ENV"
+
           echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           echo "$HOME/android-sdk/platform-tools" >> "$GITHUB_PATH"
           echo "$HOME/android-sdk/build-tools/35.0.0" >> "$GITHUB_PATH"
 
       - name: Install Android SDK packages
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
         run: |
-          yes | sdkmanager --licenses || true
+          export ANDROID_HOME="$HOME/android-sdk"
+          export ANDROID_SDK_ROOT="$HOME/android-sdk"
+
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
+
+          echo "Accepting Android SDK licenses..."
+
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
 
           sdkmanager \
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"
 
-      - name: Verify Android SDK
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+      - name: Verify Android SDK and AIDL
         run: |
+          export ANDROID_HOME="$HOME/android-sdk"
+          export ANDROID_SDK_ROOT="$HOME/android-sdk"
+
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/35.0.0:$PATH"
+
           echo "ANDROID_HOME=$ANDROID_HOME"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
 
-          echo ""
           echo "sdkmanager:"
-          which sdkmanager
+          command -v sdkmanager
 
-          echo ""
           echo "AIDL:"
+          command -v aidl
+
+          echo "AIDL file:"
           ls -lah "$ANDROID_HOME/build-tools/35.0.0/aidl"
 
-          echo ""
-          echo "Build Tools:"
-          ls -lah "$ANDROID_HOME/build-tools/35.0.0"
+          echo "Testing AIDL:"
+          aidl --help >/dev/null 2>&1 || true
 
-          echo ""
-          echo "Platform:"
-          ls -lah "$ANDROID_HOME/platforms/android-35"
+          echo "Android SDK verification complete."
 
-      - name: Check project
+      - name: Verify Python build tools
         run: |
-          test -f main.py
-          test -f buildozer.spec
+          python --version
+          python -c "import setuptools; print('setuptools:', setuptools.__version__)"
+          python -c "import Cython; print('Cython:', Cython.__version__)"
+          python -c "import buildozer; print('Buildozer:', buildozer.__version__)"
 
-          echo "main.py: OK"
-          echo "buildozer.spec: OK"
+      - name: Fix Python host version for python-for-android
+        run: |
+          sed -i \
+            's/python3==3.11.7/python3==3.11.7,hostpython3==3.11.7/' \
+            buildozer.spec
 
-      - name: Clean Buildozer
+          echo "Updated requirements:"
+          grep "^requirements" buildozer.spec
+
+      - name: Clean previous Android build
         run: |
           rm -rf .buildozer
           rm -rf bin
@@ -127,16 +166,26 @@ jobs:
         run: |
           export PATH="$JAVA_HOME/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/35.0.0:$PATH"
 
+          echo "Java:"
           java -version
+
+          echo "Python:"
           python --version
+
+          echo "Cython:"
           cython --version
-          aidl --version
+
+          echo "AIDL:"
+          command -v aidl
+
+          echo "Starting Buildozer..."
 
           buildozer android debug
 
       - name: Show APK
         if: success()
         run: |
+          echo "APK files:"
           ls -lah bin
 
       - name: Upload APK
