@@ -10,7 +10,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python 3.11
         uses: actions/setup-python@v6
         with:
           python-version: '3.11.7'
@@ -29,6 +29,7 @@ jobs:
             unzip \
             openjdk-17-jdk \
             autoconf \
+            automake \
             libtool \
             pkg-config \
             zlib1g-dev \
@@ -37,7 +38,7 @@ jobs:
             cmake \
             libffi-dev \
             libssl-dev \
-            automake
+            wget
 
       - name: Setup Java 17
         run: |
@@ -62,41 +63,43 @@ jobs:
           python --version
           buildozer --version
 
-      - name: Check project
+      - name: Check project files
         run: |
-          echo "Project files:"
+          echo "===== PROJECT ====="
           find . -maxdepth 3 -type f | sort
 
-          echo "Checking buildozer.spec:"
+          echo "===== BUILDOZER SPEC ====="
           test -f buildozer.spec
           cat buildozer.spec
 
-      - name: Accept Android SDK licenses
-        run: |
-          mkdir -p "$ANDROID_HOME/licenses"
-
-          echo "8933bad161af4178b1185d1a37fbf41ea5269c55" \
-            > "$ANDROID_HOME/licenses/android-sdk-license"
-
-          echo "d56f5187479451eabf01fb78af6dfcb131a6481e" \
-            >> "$ANDROID_HOME/licenses/android-sdk-license"
-
-          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" \
-            >> "$ANDROID_HOME/licenses/android-sdk-license"
-
-      - name: Clean Buildozer
+      - name: Clean old Buildozer data
         run: |
           rm -rf .buildozer
           rm -rf bin
 
+      - name: Prepare Buildozer Android SDK
+        run: |
+          mkdir -p "$HOME/.buildozer/android/platform/android-sdk/licenses"
+
+          SDK_LICENSE="$HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license"
+
+          printf '%s\n' \
+            "8933bad161af4178b1185d1a37fbf41ea5269c55" \
+            "d56f5187479451eabf01fb78af6dfcb131a6481e" \
+            "24333f8a63b6825ea9c5514f83c2829b004d1fee" \
+            > "$SDK_LICENSE"
+
+          echo "SDK license file created:"
+          cat "$SDK_LICENSE"
+
       - name: Build APK
         run: |
-          buildozer -v android debug
+          yes | buildozer -v android debug
 
-      - name: List APK
+      - name: Show APK files
         if: always()
         run: |
-          echo "APK files:"
+          echo "===== APK FILES ====="
           find bin -type f -name "*.apk" -print || true
           ls -lah bin/ || true
 
