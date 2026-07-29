@@ -1,0 +1,8 @@
+setuptools
+wheel
+cython<3
+buildozer
+kivy==2.3.0
+kivymd==1.2.0
+pillow
+reportlab==4.0.9
