@@ -1,111 +1,76 @@
 [app]
 
-(str) Title of your application
-
+# نام برنامه
 title = Resume Builder
 
-(str) Package name
-
+# نام پکیج
 package.name = resumebuilder
 
-(str) Package domain
-
+# دامنه پکیج
 package.domain = org.wondxpt
 
-(str) Source code directory
-
+# مسیر فایل‌های برنامه
 source.dir = .
 
-(str) Application version
+# پسوندهایی که همراه برنامه قرار می‌گیرند
+source.include_exts = py,png,jpg,jpeg,kv,atlas,ttf,otf,json
 
+# نسخه برنامه
 version = 1.0.0
 
-(str) Supported file extensions
+# کتابخانه‌های مورد نیاز
+requirements = python3,kivy==2.3.0,kivymd==1.2.0,pillow,reportlab
 
-source.include_exts = py,png,jpg,jpeg,kv,atlas,json,ttf,otf
-
-(list) List of inclusions using pattern matching
-
-source.include_patterns = assets/,fonts/
-
-(str) Application requirements
-
-requirements = python3==3.11.7,kivy==2.3.0,kivymd==1.2.0,pillow,reportlab
-
-(str) Presplash
-
-presplash.filename = %(source.dir)s/presplash.png
-
-(str) Icon
-
-icon.filename = %(source.dir)s/icon.png
-
-(str) Orientation
-
+# جهت صفحه
 orientation = portrait
 
-(str) Android API
-
-android.api = 35
-
-(str) Minimum Android API
-
-android.minapi = 24
-
-(str) Android NDK version
-
-android.ndk = 25b
-
-(str) Android architectures
-
-android.archs = arm64-v8a,armeabi-v7a
-
-(str) Android app theme
-
-android.entrypoint = org.kivy.android.PythonActivity
-
-(bool) Fullscreen
-
+# نمایش تمام‌صفحه
 fullscreen = 0
 
-(str) Python-for-Android branch
 
-p4a.branch = master
+# --------------------------------------------------
+# Android
+# --------------------------------------------------
 
-(str) Android permissions
+# حداقل نسخه Android
+android.minapi = 24
 
+# Android API مورد استفاده برای Build
+android.api = 35
+
+# معماری‌ها
+android.archs = arm64-v8a,armeabi-v7a
+
+# NDK
+android.ndk = 28c
+
+# مسیر SDK
+android.sdk_path = /home/runner/android-sdk
+
+# قبول License
+android.accept_sdk_license = True
+
+
+# --------------------------------------------------
+# Android application settings
+# --------------------------------------------------
+
+# نام Activity
+android.entrypoint = org.kivy.android.PythonActivity
+
+# AndroidX
+android.enable_androidx = True
+
+# اجازه دسترسی اینترنت
 android.permissions = INTERNET
 
-(str) Android private storage
 
-android.private_storage = True
+# --------------------------------------------------
+# Build settings
+# --------------------------------------------------
 
-(str) Android release build
-
-android.release_artifact = apk
-
-(str) Android debug build
-
-android.debug_artifact = apk
-
-(str) Log level
-
-log_level = 2
-
-[buildozer]
-
-(str) Log level
-
-log_level = 2
-
-(str) Warning for root user
-
+# هشدارهای Buildozer
 warn_on_root = 1
 
-(str) Build directory
-
-build_dir = .buildozer
-
-(str) Android SDK/NDK packages directory
-
-bin_dir = bin
+# خروجی لاگ
+log_level = 2
