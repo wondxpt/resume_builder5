@@ -1,76 +1,111 @@
 [app]
 
-# (str) Title of your application
+(str) Title of your application
+
 title = Resume Builder
 
-# (str) Package name
+(str) Package name
+
 package.name = resumebuilder
 
-# (str) Package domain
+(str) Package domain
+
 package.domain = org.wondxpt
 
-# (str) Source code directory
+(str) Source code directory
+
 source.dir = .
 
-# (str) Application entry point
-source.main = main.py
+(str) Application version
 
-# (list) Source files to include
-source.include_exts = py,png,jpg,jpeg,kv,atlas,json,ttf,otf,pdf
+version = 1.0.0
 
-# (list) Python requirements
-requirements = python3==3.11.7,hostpython3==3.11.7,kivy==2.3.0,kivymd==1.2.0,pillow,reportlab
+(str) Supported file extensions
 
-# (str) Presplash
+source.include_exts = py,png,jpg,jpeg,kv,atlas,json,ttf,otf
+
+(list) List of inclusions using pattern matching
+
+source.include_patterns = assets/,fonts/
+
+(str) Application requirements
+
+requirements = python3==3.11.7,kivy==2.3.0,kivymd==1.2.0,pillow,reportlab
+
+(str) Presplash
+
 presplash.filename = %(source.dir)s/presplash.png
 
-# (str) Icon
+(str) Icon
+
 icon.filename = %(source.dir)s/icon.png
 
-# (str) Supported orientation
+(str) Orientation
+
 orientation = portrait
 
-# (str) Android API
-android.api = 34
+(str) Android API
 
-# (str) Minimum Android API
+android.api = 35
+
+(str) Minimum Android API
+
 android.minapi = 24
 
-# (str) Android NDK version
+(str) Android NDK version
+
 android.ndk = 25b
 
-# (str) Android architecture
-android.archs = arm64-v8a, armeabi-v7a
+(str) Android architectures
 
-# (bool) Fullscreen
-fullscreen = 0
+android.archs = arm64-v8a,armeabi-v7a
 
-# (str) Android permissions
-android.permissions = INTERNET
+(str) Android app theme
 
-# (str) Android entry point
 android.entrypoint = org.kivy.android.PythonActivity
 
-# (str) Android app theme
-android.presplash_color = #FFFFFF
+(bool) Fullscreen
 
-# (bool) Copy libraries
-android.copy_libs = 1
+fullscreen = 0
 
-# (str) Python-for-Android release channel
-p4a.channel = stable
+(str) Python-for-Android branch
 
-# (str) Log level
+p4a.branch = master
+
+(str) Android permissions
+
+android.permissions = INTERNET
+
+(str) Android private storage
+
+android.private_storage = True
+
+(str) Android release build
+
+android.release_artifact = apk
+
+(str) Android debug build
+
+android.debug_artifact = apk
+
+(str) Log level
+
 log_level = 2
-
-# (bool) Warn when running as root
-warn_on_root = 1
-
 
 [buildozer]
 
-# (str) Log level
+(str) Log level
+
 log_level = 2
 
-# (str) Warning when running as root
+(str) Warning for root user
+
 warn_on_root = 1
+
+(str) Build directory
+
+build_dir = .buildozer
+
+(str) Android SDK/NDK packages directory
+
+bin_dir = bin
