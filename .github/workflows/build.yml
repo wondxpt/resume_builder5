@@ -49,10 +49,8 @@ jobs:
         run: |
           pwd
           ls -lah
-
           test -f main.py
           test -f buildozer.spec
-
           echo "main.py OK"
           echo "buildozer.spec OK"
 
@@ -75,7 +73,6 @@ jobs:
           export ANDROID_SDK_ROOT="$HOME/android-sdk"
 
           mkdir -p "$ANDROID_HOME/cmdline-tools"
-
           cd "$RUNNER_TEMP"
 
           wget -q \
@@ -83,32 +80,43 @@ jobs:
             -O commandlinetools.zip
 
           unzip -q commandlinetools.zip
-
           rm -rf "$ANDROID_HOME/cmdline-tools/latest"
-
           mv cmdline-tools "$ANDROID_HOME/cmdline-tools/latest"
 
           echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
-
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
           echo "$ANDROID_HOME/build-tools/37.0.0" >> "$GITHUB_PATH"
 
+      # Buildozer 1.6.0 still checks the old Android SDK tools/bin path.
+      - name: Create Buildozer SDK compatibility paths
+        run: |
+          mkdir -p "$ANDROID_HOME/tools/bin"
+
+          cat > "$ANDROID_HOME/tools/bin/sdkmanager" <<'EOF'
+          #!/bin/sh
+          exec "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "$@"
+          EOF
+
+          cat > "$ANDROID_HOME/tools/bin/avdmanager" <<'EOF'
+          #!/bin/sh
+          exec "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" "$@"
+          EOF
+
+          chmod +x "$ANDROID_HOME/tools/bin/sdkmanager"
+          chmod +x "$ANDROID_HOME/tools/bin/avdmanager"
+
+          echo "Compatibility sdkmanager:"
+          "$ANDROID_HOME/tools/bin/sdkmanager" --version
+
       - name: Accept Android licenses
         run: |
-          export ANDROID_HOME="$HOME/android-sdk"
-          export ANDROID_SDK_ROOT="$HOME/android-sdk"
-
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-
-          yes | sdkmanager --licenses
+          yes | sdkmanager --licenses || true
 
       - name: Install Android SDK packages
         run: |
-          export ANDROID_HOME="$HOME/android-sdk"
-          export ANDROID_SDK_ROOT="$HOME/android-sdk"
-
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
 
           sdkmanager \
@@ -118,9 +126,6 @@ jobs:
 
       - name: Verify Android SDK
         run: |
-          export ANDROID_HOME="$HOME/android-sdk"
-          export ANDROID_SDK_ROOT="$HOME/android-sdk"
-
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/37.0.0:$PATH"
 
           echo "ANDROID_HOME=$ANDROID_HOME"
@@ -128,6 +133,9 @@ jobs:
 
           echo "sdkmanager:"
           command -v sdkmanager
+
+          echo "Legacy sdkmanager path:"
+          ls -lah "$ANDROID_HOME/tools/bin/sdkmanager"
 
           echo "adb:"
           command -v adb
@@ -138,23 +146,28 @@ jobs:
           echo "Installed build-tools:"
           ls -lah "$ANDROID_HOME/build-tools"
 
-          echo "AIDL:"
-          ls -lah "$ANDROID_HOME/build-tools/37.0.0/aidl"
-
           echo "SDK verification successful."
 
       - name: Configure Buildozer SDK
         run: |
-          sed -i \
-            's|^#\?android.sdk_path.*|android.sdk_path = /home/runner/android-sdk|' \
-            buildozer.spec
+          if grep -qE '^#?android\.sdk_path[[:space:]]*=' buildozer.spec; then
+            sed -i \
+              's|^#\?android\.sdk_path[[:space:]]*=.*|android.sdk_path = /home/runner/android-sdk|' \
+              buildozer.spec
+          else
+            printf '\nandroid.sdk_path = /home/runner/android-sdk\n' >> buildozer.spec
+          fi
 
-          sed -i \
-            's|^#\?android.accept_sdk_license.*|android.accept_sdk_license = True|' \
-            buildozer.spec
+          if grep -qE '^#?android\.accept_sdk_license[[:space:]]*=' buildozer.spec; then
+            sed -i \
+              's|^#\?android\.accept_sdk_license[[:space:]]*=.*|android.accept_sdk_license = True|' \
+              buildozer.spec
+          else
+            printf 'android.accept_sdk_license = True\n' >> buildozer.spec
+          fi
 
           echo "Buildozer SDK configuration:"
-          grep -E "android.sdk_path|android.accept_sdk_license" buildozer.spec || true
+          grep -E "android\.sdk_path|android\.accept_sdk_license" buildozer.spec
 
       - name: Clean Buildozer
         run: |
@@ -175,11 +188,8 @@ jobs:
           echo "Android SDK:"
           echo "$ANDROID_HOME"
 
-          echo "AIDL:"
-          "$ANDROID_HOME/build-tools/37.0.0/aidl" --help >/dev/null 2>&1 || true
-
           echo "Buildozer SDK setting:"
-          grep "android.sdk_path" buildozer.spec || true
+          grep "android.sdk_path" buildozer.spec
 
       - name: Build APK
         env:
@@ -188,10 +198,9 @@ jobs:
           ANDROIDSDK: /home/runner/android-sdk
           JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
         run: |
-          export PATH="$JAVA_HOME/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/37.0.0:$PATH"
+          export PATH="$JAVA_HOME/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools/37.0.0:$PATH"
 
           echo "Starting Buildozer..."
-
           buildozer -v android debug
 
       - name: Show APK
