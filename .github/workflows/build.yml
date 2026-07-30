@@ -2,45 +2,74 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch: {}
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          git \
+          ffmpeg \
+          libsdl2-dev \
+          libsdl2-image-dev \
+          libsdl2-mixin-dev \
+          libsdl2-ttf-dev \
+          libportmidi-dev \
+          libswscale-dev \
+          libavformat-dev \
+          libavcodec-dev \
+          zlib1g-dev \
+          libgstreamer1.0-dev \
+          gstreamer1.0-plugins-base \
+          gstreamer1.0-plugins-good \
+          libsqlite3-dev \
+          sqlite3 \
+          bzip2 \
+          libbz2-dev \
+          libssl-dev \
+          openssl \
+          libffi-dev \
+          liblzma-dev \
+          tk-dev \
+          autoconf \
+          automake \
+          libtool \
+          pkg-config \
+          cmake \
+          zip \
+          unzip \
+          openjdk-17-jdk
 
-      - name: Install system build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            autoconf automake libtool libtool-bin pkg-config \
-            build-essential git zip unzip openjdk-17-jdk \
-            libffi-dev libssl-dev zlib1g-dev \
-            libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
-            libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install "cython<3.0.0"
+        pip install buildozer
 
-      - name: Install Buildozer and Cython
-        run: pip install --upgrade "buildozer==1.5.0" cython
+    - name: Build APK with Buildozer
+      run: |
+        buildozer -v android debug
 
-      - name: Build the APK
-        run: yes | buildozer -v android debug
-
-      - name: Upload the built APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: resume-builder-apk
-          path: bin/*.apk
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk
+        path: bin/*.apk
+        
