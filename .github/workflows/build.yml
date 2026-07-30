@@ -1,263 +1,268 @@
-name: Build Android APK
+name: Build Resume Builder APK
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+workflow_dispatch:
+push:
+branches:
+- main
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
+build-apk:
+runs-on: ubuntu-22.04
 
-    env:
-      ANDROIDSDK: /home/runner/android-sdk
-      ANDROIDNDK: /home/runner/android-sdk/ndk/28.0.13004108
-      ANDROIDAPI: "35"
-      NDKAPI: "24"
-      ANDROIDNDKVER: "28c"
+env:
+  ANDROIDSDK: /home/runner/android-sdk
+  ANDROIDNDK: /home/runner/android-sdk/ndk/28.0.13004108
+  ANDROIDAPI: "35"
+  NDKAPI: "24"
+  ANDROIDNDKVER: "28c"
 
-    steps:
+steps:
 
-      # --------------------------------------------------
-      # 1. Checkout
-      # --------------------------------------------------
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  - name: Checkout repository
+    uses: actions/checkout@v4
 
 
-      # --------------------------------------------------
-      # 2. Java 17
-      # --------------------------------------------------
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
+  - name: Set up Python 3.11
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.11.7"
 
 
-      # --------------------------------------------------
-      # 3. Python 3.11.7
-      # --------------------------------------------------
-      - name: Set up Python 3.11.7
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11.7"
+  - name: Set up JDK 17
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: "17"
 
 
-      # --------------------------------------------------
-      # 4. Install Linux dependencies
-      # --------------------------------------------------
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
+  - name: Install system dependencies
+    run: |
+      sudo apt-get update
 
-          sudo apt-get install -y \
-            git \
-            zip \
-            unzip \
-            wget \
-            curl \
-            openjdk-17-jdk \
-            autoconf \
-            automake \
-            autopoint \
-            libtool \
-            pkg-config \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            libtinfo5 \
-            cmake \
-            libffi-dev \
-            libssl-dev \
-            build-essential
+      sudo apt-get install -y \
+        git \
+        zip \
+        unzip \
+        wget \
+        curl \
+        autoconf \
+        automake \
+        autopoint \
+        libtool \
+        pkg-config \
+        zlib1g-dev \
+        libncurses5-dev \
+        libncursesw5-dev \
+        libtinfo5 \
+        cmake \
+        libffi-dev \
+        libssl-dev \
+        build-essential
 
 
-      # --------------------------------------------------
-      # 5. Install Python build tools
-      # --------------------------------------------------
-      - name: Install Python build tools
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install --upgrade \
-            buildozer \
-            cython==0.29.37
+  - name: Install Python build tools
+    run: |
+      python -m pip install --upgrade pip setuptools wheel
+
+      python -m pip install \
+        "Cython==0.29.37" \
+        "buildozer==1.6.0"
 
 
-      # --------------------------------------------------
-      # 6. Install Android SDK
-      # --------------------------------------------------
-      - name: Install Android SDK
-        run: |
-          set -e
+  - name: Install Android SDK
+    run: |
+      set -e
 
-          SDK_ROOT="/home/runner/android-sdk"
+      SDK_ROOT="/home/runner/android-sdk"
 
-          mkdir -p "$SDK_ROOT/cmdline-tools"
+      mkdir -p "$SDK_ROOT/cmdline-tools"
 
-          cd /tmp
+      cd /tmp
 
-          wget -q \
-            https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip \
-            -O commandlinetools.zip
+      wget -q \
+        https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip \
+        -O commandlinetools.zip
 
-          unzip -q commandlinetools.zip
+      unzip -q commandlinetools.zip
 
-          mkdir -p "$SDK_ROOT/cmdline-tools/latest"
+      mkdir -p "$SDK_ROOT/cmdline-tools/latest"
 
-          mv cmdline-tools/* "$SDK_ROOT/cmdline-tools/latest/"
+      mv cmdline-tools/* "$SDK_ROOT/cmdline-tools/latest/"
 
-          export PATH="$SDK_ROOT/cmdline-tools/latest/bin:$SDK_ROOT/platform-tools:$PATH"
+      echo "$SDK_ROOT/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+      echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+      echo "$SDK_ROOT/build-tools/35.0.0" >> "$GITHUB_PATH"
 
-          echo "$SDK_ROOT/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+      yes | sdkmanager \
+        --sdk_root="$SDK_ROOT" \
+        --licenses >/dev/null || true
 
-          yes | sdkmanager --sdk_root="$SDK_ROOT" --licenses >/dev/null || true
-
-          sdkmanager --sdk_root="$SDK_ROOT" \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0" \
-            "ndk;28.0.13004108"
-
-
-      # --------------------------------------------------
-      # 7. Verify Android SDK
-      # --------------------------------------------------
-      - name: Verify Android SDK
-        run: |
-          set -e
-
-          echo "ANDROIDSDK=$ANDROIDSDK"
-          echo "ANDROIDNDK=$ANDROIDNDK"
-
-          echo ""
-          echo "SDK directory:"
-          ls -lah "$ANDROIDSDK"
-
-          echo ""
-          echo "Build-tools:"
-          ls -lah "$ANDROIDSDK/build-tools"
-
-          echo ""
-          echo "AIDL:"
-          find "$ANDROIDSDK/build-tools" -name aidl -type f -print
-
-          echo ""
-          echo "NDK:"
-          ls -lah "$ANDROIDNDK"
-
-          echo ""
-          echo "SDK packages:"
-          sdkmanager --sdk_root="$ANDROIDSDK" --list_installed | head -100
+      sdkmanager \
+        --sdk_root="$SDK_ROOT" \
+        "platform-tools" \
+        "platforms;android-35" \
+        "build-tools;35.0.0" \
+        "ndk;28.0.13004108"
 
 
-      # --------------------------------------------------
-      # 8. Force Buildozer to use the SAME SDK
-      # --------------------------------------------------
-      - name: Configure Buildozer Android paths
-        run: |
-          set -e
+  - name: Verify Android SDK and NDK
+    run: |
+      set -e
 
-          mkdir -p /home/runner/.buildozer/android/platform
+      echo "======================================"
+      echo "ANDROIDSDK"
+      echo "======================================"
+      echo "$ANDROIDSDK"
 
-          rm -rf /home/runner/.buildozer/android/platform/android-sdk
+      echo ""
+      echo "======================================"
+      echo "ANDROIDNDK"
+      echo "======================================"
+      echo "$ANDROIDNDK"
 
-          ln -s \
-            /home/runner/android-sdk \
-            /home/runner/.buildozer/android/platform/android-sdk
+      echo ""
+      echo "======================================"
+      echo "BUILD TOOLS"
+      echo "======================================"
 
-          echo "Buildozer SDK link:"
-          ls -lah /home/runner/.buildozer/android/platform/
+      test -d "$ANDROIDSDK/build-tools/35.0.0"
 
-          echo ""
-          echo "Resolved SDK path:"
-          readlink -f /home/runner/.buildozer/android/platform/android-sdk
+      ls -lah "$ANDROIDSDK/build-tools/35.0.0"
 
-          echo ""
-          echo "AIDL through Buildozer path:"
-          find \
-            /home/runner/.buildozer/android/platform/android-sdk/build-tools \
-            -name aidl \
-            -type f \
-            -print
+      echo ""
+      echo "======================================"
+      echo "AIDL"
+      echo "======================================"
 
+      test -f "$ANDROIDSDK/build-tools/35.0.0/aidl"
 
-      # --------------------------------------------------
-      # 9. Clean old Buildozer state
-      # --------------------------------------------------
-      - name: Clean Buildozer
-        run: |
-          rm -rf .buildozer
-          rm -rf bin
+      "$ANDROIDSDK/build-tools/35.0.0/aidl" --version
 
-          mkdir -p /home/runner/.buildozer/android/platform
+      echo ""
+      echo "======================================"
+      echo "PLATFORM"
+      echo "======================================"
 
-          ln -s \
-            /home/runner/android-sdk \
-            /home/runner/.buildozer/android/platform/android-sdk
+      test -d "$ANDROIDSDK/platforms/android-35"
 
+      echo ""
+      echo "======================================"
+      echo "NDK"
+      echo "======================================"
 
-      # --------------------------------------------------
-      # 10. Final environment check
-      # --------------------------------------------------
-      - name: Final Android environment check
-        run: |
-          set -e
+      test -d "$ANDROIDNDK"
 
-          echo "========================================"
-          echo "ANDROIDSDK"
-          echo "========================================"
-          echo "$ANDROIDSDK"
+      ls -lah "$ANDROIDNDK"
 
-          echo ""
-          echo "========================================"
-          echo "ANDROIDNDK"
-          echo "========================================"
-          echo "$ANDROIDNDK"
-
-          echo ""
-          echo "========================================"
-          echo "SDK BUILD TOOLS"
-          echo "========================================"
-          ls -lah "$ANDROIDSDK/build-tools/35.0.0"
-
-          echo ""
-          echo "========================================"
-          echo "AIDL"
-          echo "========================================"
-          "$ANDROIDSDK/build-tools/35.0.0/aidl" --version
-
-          echo ""
-          echo "========================================"
-          echo "NDK"
-          echo "========================================"
-          cat "$ANDROIDNDK/source.properties"
+      echo ""
+      cat "$ANDROIDNDK/source.properties"
 
 
-      # --------------------------------------------------
-      # 11. Build APK
-      # --------------------------------------------------
-      - name: Build APK
-        run: |
-          set -e
+  - name: Configure Buildozer Android paths
+    run: |
+      set -e
 
-          export ANDROIDSDK="/home/runner/android-sdk"
-          export ANDROIDNDK="/home/runner/android-sdk/ndk/28.0.13004108"
-          export ANDROIDAPI="35"
-          export NDKAPI="24"
-          export ANDROIDNDKVER="28c"
+      mkdir -p /home/runner/.buildozer/android/platform
 
-          buildozer android debug
+      rm -rf /home/runner/.buildozer/android/platform/android-sdk
+
+      ln -s \
+        /home/runner/android-sdk \
+        /home/runner/.buildozer/android/platform/android-sdk
+
+      echo "Buildozer Android SDK:"
+      readlink -f \
+        /home/runner/.buildozer/android/platform/android-sdk
+
+      echo ""
+      echo "Buildozer AIDL:"
+      /home/runner/.buildozer/android/platform/android-sdk/build-tools/35.0.0/aidl --version
 
 
-      # --------------------------------------------------
-      # 12. Upload APK
-      # --------------------------------------------------
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Resume-Builder-APK
-          path: bin/*.apk
-          if-no-files-found: error
+  - name: Check project files
+    run: |
+      set -e
+
+      test -f main.py
+      test -f buildozer.spec
+      test -f pdf_generator.py
+      test -f resume_data.py
+      test -f pdf_preview.py
+
+      echo "Project files: OK"
+
+
+  - name: Clean Buildozer
+    run: |
+      rm -rf .buildozer
+      rm -rf bin
+
+      mkdir -p /home/runner/.buildozer/android/platform
+
+      rm -rf /home/runner/.buildozer/android/platform/android-sdk
+
+      ln -s \
+        /home/runner/android-sdk \
+        /home/runner/.buildozer/android/platform/android-sdk
+
+
+  - name: Final environment check
+    run: |
+      set -e
+
+      echo "Python:"
+      python --version
+
+      echo ""
+      echo "Buildozer:"
+      buildozer --version
+
+      echo ""
+      echo "Cython:"
+      cython --version
+
+      echo ""
+      echo "Java:"
+      java -version
+
+      echo ""
+      echo "AIDL:"
+      aidl --version
+
+      echo ""
+      echo "ANDROIDSDK=$ANDROIDSDK"
+      echo "ANDROIDNDK=$ANDROIDNDK"
+      echo "ANDROIDAPI=$ANDROIDAPI"
+      echo "NDKAPI=$NDKAPI"
+      echo "ANDROIDNDKVER=$ANDROIDNDKVER"
+
+
+  - name: Build APK
+    run: |
+      set -e
+
+      export ANDROIDSDK="/home/runner/android-sdk"
+      export ANDROIDNDK="/home/runner/android-sdk/ndk/28.0.13004108"
+      export ANDROIDAPI="35"
+      export NDKAPI="24"
+      export ANDROIDNDKVER="28c"
+
+      export PATH="$ANDROIDSDK/cmdline-tools/latest/bin:$ANDROIDSDK/platform-tools:$ANDROIDSDK/build-tools/35.0.0:$ANDROIDNDK:$PATH"
+
+      buildozer -v android debug
+
+
+  - name: Show APK
+    if: success()
+    run: |
+      ls -lah bin
+
+
+  - name: Upload APK
+    if: success()
+    uses: actions/upload-artifact@v4
+    with:
+      name: resume-builder-apk
+      path: bin/*.apk
+      if-no-files-found: error
