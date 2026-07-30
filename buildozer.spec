@@ -15,8 +15,10 @@ source.dir = .
 # (list) Source files to include (process only files with these extensions)
 source.include_exts = py,png,jpg,kv,atlas
 
+# (str) Application versioning
+version = 0.1
+
 # (list) Application requirements
-# Note: Cython is managed automatically by buildozer, so python3 and kivy are key here
 requirements = python3,kivy==2.3.0
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
