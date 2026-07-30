@@ -1,76 +1,104 @@
 [app]
 
-# نام برنامه
+# (str) Title of your application
 title = Resume Builder
 
-# نام پکیج
+# (str) Package name
 package.name = resumebuilder
 
-# دامنه پکیج
-package.domain = org.wondxpt
+# (str) Package domain
+package.domain = org.resumebuilder
 
-# مسیر فایل‌های برنامه
+# (str) Source code directory
 source.dir = .
 
-# پسوندهایی که همراه برنامه قرار می‌گیرند
-source.include_exts = py,png,jpg,jpeg,kv,atlas,ttf,otf,json
+# (list) Source files to include
+source.include_exts = py,png,jpg,jpeg,kv,atlas,json,txt,ttf,otf,woff,woff2
 
-# نسخه برنامه
+# (list) Source directories to exclude
+source.exclude_dirs = .git,.github,.buildozer,bin,__pycache__
+
+# (list) Source patterns to exclude
+source.exclude_patterns = *.pyc,*.pyo,.git/*,.github/*,.buildozer/*,bin/*
+
+# (str) Application version
 version = 1.0.0
 
-# کتابخانه‌های مورد نیاز
+# (list) Application requirements
 requirements = python3,kivy==2.3.0,kivymd==1.2.0,pillow,reportlab
 
-# جهت صفحه
+# (str) Custom orientation
 orientation = portrait
 
-# نمایش تمام‌صفحه
+# (bool) Fullscreen
 fullscreen = 0
 
+# (str) Presplash
+# presplash.filename = %(source.dir)s/data/presplash.png
 
-# --------------------------------------------------
+# (str) Icon
+# icon.filename = %(source.dir)s/data/icon.png
+
+
+#
 # Android
-# --------------------------------------------------
+#
 
-# حداقل نسخه Android
-android.minapi = 24
-
-# Android API مورد استفاده برای Build
-android.api = 35
-
-# معماری‌ها
-android.archs = arm64-v8a,armeabi-v7a
-
-# NDK
-android.ndk = 28c
-
-# مسیر SDK
-android.sdk_path = /home/runner/android-sdk
-
-# قبول License
-android.accept_sdk_license = True
-
-
-# --------------------------------------------------
-# Android application settings
-# --------------------------------------------------
-
-# نام Activity
-android.entrypoint = org.kivy.android.PythonActivity
-
-# AndroidX
+# (bool) Enable Android
 android.enable_androidx = True
 
-# اجازه دسترسی اینترنت
+# Android API
+android.api = 35
+
+# Minimum Android API
+android.minapi = 24
+
+# Android NDK
+android.ndk = 25b
+
+# Android architectures
+android.archs = arm64-v8a,armeabi-v7a
+
+# Android permissions
 android.permissions = INTERNET
 
+# Android private storage
+android.private_storage = True
 
-# --------------------------------------------------
-# Build settings
-# --------------------------------------------------
+# Android orientation
+android.orientation = portrait
 
-# هشدارهای Buildozer
+# Android backup
+android.allow_backup = False
+
+# Android numeric version
+android.numeric_version = 1
+
+
+#
+# Python-for-Android
+#
+
+# Use the installed/pinned python-for-android package.
+# Do not use a custom local recipe in this build.
+p4a.fork = kivy
+
+# Keep p4a on the stable 2024 release installed by build.yml.
+# Do not add p4a.local_recipes here.
+
+
+#
+# Buildozer
+#
+
+# Log level
+log_level = 2
+
+# Warn if running as root
 warn_on_root = 1
 
-# خروجی لاگ
-log_level = 2
+# Build directory
+build_dir = ./.buildozer
+
+# Output directory
+bin_dir = ./bin
