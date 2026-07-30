@@ -27,9 +27,6 @@ android.minapi = 24
 android.ndk = 28c
 android.ndk_api = 24
 
-android.sdk_path = /home/runner/android-sdk
-android.ndk_path = /home/runner/android-sdk/ndk/28.0.13004108
-
 android.archs = arm64-v8a,armeabi-v7a
 
 android.permissions = INTERNET
