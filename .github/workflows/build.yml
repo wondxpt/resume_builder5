@@ -36,6 +36,18 @@ jobs:
       - name: Install Buildozer and Cython
         run: pip install --upgrade "buildozer==1.5.0" cython
 
+      - name: Remove outdated reportlab recipe (avoid broken C accelerator build)
+        run: |
+          python -c "
+          import pythonforandroid, os, shutil
+          recipe_dir = os.path.join(os.path.dirname(pythonforandroid.__file__), 'recipes', 'reportlab')
+          if os.path.isdir(recipe_dir):
+              shutil.rmtree(recipe_dir)
+              print('Removed outdated recipe at', recipe_dir)
+          else:
+              print('No reportlab recipe found at', recipe_dir, '(already absent, nothing to do)')
+          "
+
       - name: Build the APK
         run: yes | buildozer -v android debug
 
