@@ -17,6 +17,7 @@ from kivymd.uix.button import MDRaisedButton, MDFlatButton
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.menu import MDDropdownMenu
 from kivy.uix.popup import Popup
+from pdf_generator import generate_resume_pdf, TEMPLATES
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.image import Image as KivyImage
 
