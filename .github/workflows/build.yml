@@ -43,21 +43,6 @@ jobs:
             ~/.buildozer
             .buildozer
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            buildozer-${{ runner.os }}-
-
-      - name: Bootstrap python-for-android (clone only, build not expected to succeed yet)
-        run: buildozer android p4a -- --help || true
-
-      - name: Remove broken reportlab C-accelerator recipe
-        run: |
-          RECIPE_DIR=".buildozer/android/platform/python-for-android/pythonforandroid/recipes/reportlab"
-          if [ -d "$RECIPE_DIR" ]; then
-            rm -rf "$RECIPE_DIR"
-            echo "Removed reportlab recipe folder. reportlab will now install as a plain pip package (pure Python, no C accelerator, no compile errors)."
-          else
-            echo "WARNING: reportlab recipe folder not found at $RECIPE_DIR (nothing to remove)."
-          fi
 
       - name: Build the APK
         run: yes | buildozer -v android debug
