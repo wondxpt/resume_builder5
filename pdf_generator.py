@@ -2,6 +2,32 @@ from fpdf import FPDF
 import os
 from datetime import datetime
 class ResumePDF(FPDF):
+TEMPLATES = {
+    "classic": {
+        "label": "Classic ATS",
+        "description": "Simple ATS friendly single column resume"
+    },
+    "canadian": {
+        "label": "Canadian Standard",
+        "description": "Professional Canadian resume format"
+    },
+    "corporate": {
+        "label": "US Corporate",
+        "description": "American corporate resume format"
+    },
+    "modern": {
+        "label": "Modern Professional",
+        "description": "Modern clean professional layout"
+    },
+    "executive": {
+        "label": "Executive",
+        "description": "Senior level executive resume"
+    },
+    "creative_photo": {
+        "label": "Creative European",
+        "description": "Graphic resume with photo"
+    }
+    }
 
     def __init__(self):
         super().__init__(
