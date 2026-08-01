@@ -9,7 +9,7 @@ navigating back and forth between screens never loses information.
 
 class ResumeData:
     def __init__(self):
-        self.selected_template = "chronological"   # chronological | combination | functional | two_column | minimal | creative_photo
+        self.selected_template = "canadian"   # chronological | combination | functional | two_column | minimal | creative_photo
         self.full_name = ""
         self.target_title = ""      # e.g. "Hairstylist | Aspiring Python Developer"
         self.location = ""          # e.g. "Toronto, ON"
