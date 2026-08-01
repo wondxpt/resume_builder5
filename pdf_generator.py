@@ -5,29 +5,41 @@ class ResumePDF(FPDF):
 TEMPLATES = {
     "classic": {
         "label": "Classic ATS",
-        "description": "Simple ATS friendly single column resume"
+        "description": "Simple ATS friendly single column resume",
+        "layout": "standard",
+        "hex": "#333333"
     },
     "canadian": {
         "label": "Canadian Standard",
-        "description": "Professional Canadian resume format"
+        "description": "Professional Canadian resume format",
+        "layout": "standard",
+        "hex": "#1E88E5"
     },
     "corporate": {
         "label": "US Corporate",
-        "description": "American corporate resume format"
+        "description": "American corporate resume format",
+        "layout": "combination",
+        "hex": "#1565C0"
     },
     "modern": {
         "label": "Modern Professional",
-        "description": "Modern clean professional layout"
+        "description": "Modern clean professional layout",
+        "layout": "two_column",
+        "hex": "#00897B"
     },
     "executive": {
         "label": "Executive",
-        "description": "Senior level executive resume"
+        "description": "Senior level executive resume",
+        "layout": "functional",
+        "hex": "#6D4C41"
     },
     "creative_photo": {
         "label": "Creative European",
-        "description": "Graphic resume with photo"
+        "description": "Graphic resume with photo",
+        "layout": "graphic",
+        "hex": "#8E24AA"
     }
-    }
+}
 
     def __init__(self):
         super().__init__(
