@@ -1,16 +1,6 @@
-# pdf_generator.py
-# Resume Builder - FPDF2 PDF Generator
-# Supports ATS Resume Templates
-
 from fpdf import FPDF
 import os
 from datetime import datetime
-
-
-# -------------------------------
-# Main PDF Class
-# -------------------------------
-
 class ResumePDF(FPDF):
 
     def __init__(self):
@@ -150,12 +140,6 @@ def add_line(pdf):
 
     pdf.ln(3)
 
-
-
-# -------------------------------
-# Contact Section
-# -------------------------------
-
 def create_contact(pdf, data):
 
     pdf.set_font(
@@ -189,12 +173,7 @@ def create_contact(pdf, data):
     )
 
     pdf.ln(5)
-
-
-
-# -------------------------------
-# Experience Section
-# -------------------------------
+    
 
 def create_experience(pdf, data):
 
@@ -219,11 +198,6 @@ def create_experience(pdf, data):
     pdf.ln(4)
 
 
-
-# -------------------------------
-# Education Section
-# -------------------------------
-
 def create_education(pdf, data):
 
     if not data.education:
@@ -245,12 +219,6 @@ def create_education(pdf, data):
     )
 
     pdf.ln(4)
-
-
-
-# -------------------------------
-# Skills Section
-# -------------------------------
 
 def create_skills(pdf, data):
 
@@ -274,11 +242,6 @@ def create_skills(pdf, data):
 
     pdf.ln(4)
 
-
-
-# -------------------------------
-# Languages Section
-# -------------------------------
 
 def create_languages(pdf, data):
 
@@ -359,11 +322,6 @@ def create_classic(pdf, data):
 
 
 
-# -------------------------------
-# TEMPLATE 2
-# Canadian Standard Resume
-# -------------------------------
-
 def create_canadian(pdf, data):
 
     pdf.add_page()
@@ -436,11 +394,6 @@ def create_canadian(pdf, data):
     )
 
 
-
-# -------------------------------
-# TEMPLATE 3
-# US Corporate Resume
-# -------------------------------
 
 def create_corporate(pdf, data):
 
@@ -520,11 +473,6 @@ def create_corporate(pdf, data):
 
 
 
-# -------------------------------
-# TEMPLATE 4
-# Modern Professional Resume
-# -------------------------------
-
 def create_modern(pdf, data):
 
     pdf.add_page()
@@ -603,12 +551,6 @@ def create_modern(pdf, data):
         data
     )
 
-
-
-# -------------------------------
-# TEMPLATE 5
-# Executive Resume
-# -------------------------------
 
 def create_executive(pdf, data):
 
@@ -690,11 +632,6 @@ def create_executive(pdf, data):
 
 
 
-# -------------------------------
-# TEMPLATE 6
-# European Graphic Style
-# -------------------------------
-
 def create_european(pdf, data):
 
     pdf.add_page()
@@ -772,9 +709,7 @@ def create_european(pdf, data):
         pdf,
         data
     )
-    # -------------------------------
-# Main PDF Generator
-# -------------------------------
+    
 
 def generate_resume_pdf(data, output_path):
 
