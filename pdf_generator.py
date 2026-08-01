@@ -78,10 +78,6 @@ TEMPLATES = {
         )
 
 
-# -------------------------------
-# Helper Functions
-# -------------------------------
-
 def clean_text(text):
     """
     Removes unsupported characters
@@ -306,10 +302,7 @@ def create_languages(pdf, data):
     )
 
     pdf.ln(4)
-    # -------------------------------
-# TEMPLATE 1
-# Classic ATS Resume
-# -------------------------------
+
 
 def create_classic(pdf, data):
 
@@ -671,23 +664,19 @@ def create_executive(pdf, data):
 
 
 def create_european(pdf, data):
+def create_european(pdf, data):
 
     pdf.add_page()
 
-
-    pdf.set_font(
-        "Helvetica",
-        "B",
-        18
-    )
-
-    pdf.cell(
-        0,
-        10,
-        clean_text(data.full_name),
-        ln=True
-    )
-
+    if hasattr(data, "photo_path") and data.photo_path:
+        if os.path.exists(data.photo_path):
+            pdf.image(
+                data.photo_path,
+                x=160,
+                y=20,
+                w=30,
+                h=30
+            )
 
     pdf.set_font(
         "Helvetica",
@@ -818,9 +807,14 @@ def generate_resume_pdf(data, output_path):
 
 
     elif template in [
-        "european",
-        "graphic european"
-    ]:
+    "european",
+    "graphic european",
+    "creative_photo"
+]:
+    create_european(
+        pdf,
+        data
+    )
 
         create_european(
             pdf,
