@@ -4,10 +4,10 @@ title = Resume Builder
 package.name = resumebuilder
 package.domain = com.wondxpt
 source.dir = .
-source.include_exts = py,png,jpg,jpeg,kv,atlas,ttf
+source.include_exts = py,png,jpg,jpeg,kv,atlas,ttf,json
 version = 1.0
 
-requirements = python3,kivy==2.3.0,kivymd==1.2.0,reportlab,pillow,plyer,android
+requirements = python3,kivy==2.3.0,kivymd==1.2.0,reportlab,pillow==10.4.0,plyer
 
 orientation = portrait
 fullscreen = 0
@@ -16,8 +16,6 @@ presplash.filename = %(source.dir)s/presplash.png
 
 android.api = 35
 android.minapi = 24
-android.ndk = 25b
-p4a.branch = v2026.5.9
 android.archs = arm64-v8a
 android.permissions = READ_MEDIA_IMAGES, READ_EXTERNAL_STORAGE
 android.presplash_color = #FFFFFF
