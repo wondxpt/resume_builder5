@@ -7,7 +7,7 @@ source.dir = .
 source.include_exts = py,png,jpg,jpeg,kv,atlas,ttf,json
 version = 1.0
 
-requirements = python3,kivy==2.3.0,kivymd==1.2.0,reportlab,pillow==10.4.0,plyer
+requirements = python3,kivy==2.3.0,kivymd==1.2.0,fpdf2,pillow==10.4.0,plyer
 
 orientation = portrait
 fullscreen = 0
@@ -19,10 +19,11 @@ android.minapi = 24
 android.ndk = 25b
 p4a.branch = master
 android.archs = arm64-v8a
-android.permissions = READ_MEDIA_IMAGES, READ_EXTERNAL_STORAGE
+android.permissions = READ_MEDIA_IMAGES,READ_EXTERNAL_STORAGE
 android.presplash_color = #FFFFFF
 android.enable_androidx = True
 android.accept_sdk_license = True
+
 
 [buildozer]
 
