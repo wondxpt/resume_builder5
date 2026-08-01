@@ -22,7 +22,6 @@ from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.image import Image as KivyImage
 
 from resume_data import ResumeData
-from pdf_generator import generate_resume_pdf, TEMPLATES
 from template_previews import get_preview_path
 from pdf_preview import build_live_preview
 
