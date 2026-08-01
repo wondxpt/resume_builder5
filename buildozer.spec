@@ -1,4 +1,5 @@
 [app]
+
 title = Resume Builder
 package.name = resumebuilder
 package.domain = com.wondxpt
@@ -15,6 +16,8 @@ presplash.filename = %(source.dir)s/presplash.png
 
 android.api = 35
 android.minapi = 24
+android.ndk = 25b
+p4a.branch = master
 android.archs = arm64-v8a
 android.permissions = READ_MEDIA_IMAGES, READ_EXTERNAL_STORAGE
 android.presplash_color = #FFFFFF
@@ -22,5 +25,6 @@ android.enable_androidx = True
 android.accept_sdk_license = True
 
 [buildozer]
+
 log_level = 2
 warn_on_root = 1
