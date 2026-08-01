@@ -7,48 +7,91 @@ on:
 
 jobs:
   build:
+
     runs-on: ubuntu-22.04
 
     steps:
+
       - name: Check out the repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+
+      - name: Check Python version
+        run: |
+          python --version
+          pip --version
+
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
+
 
       - name: Install system build dependencies
         run: |
           sudo apt-get update
+
           sudo apt-get install -y \
-            autoconf automake libtool libtool-bin pkg-config \
-            build-essential git zip unzip openjdk-17-jdk \
-            libffi-dev libssl-dev zlib1g-dev \
-            libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
-            libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev
+            autoconf \
+            automake \
+            libtool \
+            libtool-bin \
+            pkg-config \
+            build-essential \
+            git \
+            zip \
+            unzip \
+            openjdk-17-jdk \
+            libffi-dev \
+            libssl-dev \
+            zlib1g-dev \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev \
+            libsdl2-ttf-dev \
+            libportmidi-dev \
+            libswscale-dev \
+            libavformat-dev \
+            libavcodec-dev
+
+
+      - name: Upgrade pip tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+
 
       - name: Install Buildozer and Cython
-        run: pip install --upgrade "buildozer==1.5.0" cython
+        run: |
+          pip install --upgrade \
+            "buildozer==1.5.0" \
+            "cython<3.1"
 
-      - name: Cache Buildozer downloads and platform files
+
+      - name: Cache Buildozer
         uses: actions/cache@v4
         with:
           path: |
             ~/.buildozer
             .buildozer
           key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            buildozer-${{ runner.os }}-
 
-      - name: Build the APK
-        run: yes | buildozer -v android debug
 
-      - name: Upload the built APK
+      - name: Build Android APK
+        run: |
+          yes | buildozer -v android debug
+
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: resume-builder-apk
