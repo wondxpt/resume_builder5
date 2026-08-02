@@ -29,9 +29,8 @@ android.enable_androidx = True
 android.accept_sdk_license = True
 android.presplash_color = #FFFFFF
 
-# این خط‌ها رو کاملاً حذف کن:
-# p4a.branch = ...
-# p4a.commit = ...
+p4a.branch = master
+p4a.commit = 2a5c8b7   
 
 [buildozer]
 log_level = 2
