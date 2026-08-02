@@ -17,18 +17,17 @@ from kivymd.uix.button import MDRaisedButton, MDFlatButton
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.menu import MDDropdownMenu
 from kivy.uix.popup import Popup
-from pdf_generator import generate_resume_pdf, TEMPLATES
 from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.image import Image as KivyImage
 
 from resume_data import ResumeData
+from pdf_generator import generate_resume_pdf, TEMPLATES
 from template_previews import get_preview_path
+from pdf_preview import build_live_preview
 
 Window.size = (400, 750)
 
-from plyer import storagepath
-
-OUTPUT_DIR = storagepath.get_documents_dir()
+OUTPUT_DIR = os.path.join(os.path.expanduser("~"), "Documents")
 
 LANGUAGE_OPTIONS = ["English", "French", "German", "Spanish", "Persian", "Other"]
 LEVEL_OPTIONS = [
@@ -43,6 +42,7 @@ LEVEL_OPTIONS = [
 ]
 
 
+# ---------- helpers ----------
 
 
 def make_field(hint_text, multiline=False):
@@ -110,6 +110,7 @@ def nav_row(back_action=None, next_text="Next", next_action=None):
     return row
 
 
+# ---------- screens ----------
 
 
 def build_template_screen(app):
@@ -228,37 +229,32 @@ def build_photo_screen(app):
     form.add_widget(path_label)
 
     def open_chooser(instance):
-    chooser = FileChooserIconView(filters=["*.png", "*.jpg", "*.jpeg"])
-    popup = Popup(title="Select a photo", content=chooser, size_hint=(0.9, 0.9))
+        chooser = FileChooserIconView(filters=["*.png", "*.jpg", "*.jpeg"])
+        popup = Popup(title="Select a photo", content=chooser, size_hint=(0.9, 0.9))
 
-    def on_selection(inst, selection):
-        if selection:
-            chosen_path = selection[0]
-            app.data.set_photo(chosen_path)
-            preview.source = chosen_path
-            path_label.text = chosen_path
-            popup.dismiss()
+        def on_selection(inst, selection):
+            if selection:
+                chosen_path = selection[0]
+                app.data.set_photo(chosen_path)
+                preview.source = chosen_path
+                path_label.text = chosen_path
+                popup.dismiss()
 
-    chooser.bind(selection=on_selection)
-    popup.open()
+        chooser.bind(selection=on_selection)
+        popup.open()
 
-choose_btn = MDRaisedButton(text="Choose Photo", size_hint_y=None, height=48)
-choose_btn.bind(on_press=open_chooser)
-form.add_widget(choose_btn)
+    choose_btn = MDRaisedButton(text="Choose Photo", size_hint_y=None, height=48)
+    choose_btn.bind(on_press=open_chooser)
+    form.add_widget(choose_btn)
 
-def clear_photo(instance):
-    app.data.set_photo("")
-    preview.source = ""
-    path_label.text = "No photo selected"
+    def clear_photo(instance):
+        app.data.set_photo("")
+        preview.source = ""
+        path_label.text = "No photo selected"
 
-clear_btn = MDFlatButton(
-    text="Remove Photo",
-    size_hint_y=None,
-    height=44
-)
+    clear_btn = MDFlatButton(text="Remove Photo", size_hint_y=None, height=44)
     clear_btn.bind(on_press=clear_photo)
     form.add_widget(clear_btn)
-    
 
     def go_back(instance):
         app.sm.current = "template"
@@ -373,7 +369,7 @@ def build_experience_screen(app):
         form.add_widget(f)
 
     editing_index = {"value": None}
-    
+
     def clear_fields():
         for f in [f_job_title, f_company, f_job_location, f_start, f_end, f_bullets]:
             f.text = ""
@@ -822,7 +818,11 @@ def build_preview_screen(app):
         template_label.text = f"Template: {tpl['label']}"
 
         live_png = None
-
+        if d.full_name and d.email:
+            # Render the actual PDF (same template, same styling) and show it.
+            live_png = build_live_preview(
+                d.to_dict(), generate_resume_pdf, template=d.selected_template
+            )
 
         missing = []
         if not d.full_name:
@@ -891,7 +891,7 @@ def build_preview_screen(app):
     return screen
 
 
-
+# ---------- app ----------
 class ResumeBuilderApp(MDApp):
     def build(self):
         self.title = "Canadian Resume Builder"
