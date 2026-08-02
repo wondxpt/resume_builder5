@@ -18,20 +18,18 @@ presplash.filename = %(source.dir)s/presplash.png
 
 android.api = 34
 android.minapi = 24
-android.ndk = 25c
+android.ndk = 25b
 android.ndk_api = 24
 
-android.archs = arm64-v8a,armeabi-v7a
+android.archs = arm64-v8a
 
-android.permissions = READ_MEDIA_IMAGES,READ_EXTERNAL_STORAGE
+android.permissions = READ_MEDIA_IMAGES,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
 
 android.enable_androidx = True
 android.accept_sdk_license = True
 android.presplash_color = #FFFFFF
 
-p4a.branch = master
-p4a.commit = 957a3e5
+# p4a.branch = master
+# p4a.commit = 957a3e5
 
-[buildozer]
-log_level = 2
-warn_on_root = 1
+p4a.branch = develop
