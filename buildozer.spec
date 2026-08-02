@@ -18,7 +18,7 @@ presplash.filename = %(source.dir)s/presplash.png
 
 android.api = 34
 android.minapi = 24
-android.ndk = 25b
+android.ndk = 25c
 android.ndk_api = 24
 
 android.archs = arm64-v8a
@@ -29,7 +29,10 @@ android.enable_androidx = True
 android.accept_sdk_license = True
 android.presplash_color = #FFFFFF
 
-# p4a.branch = master
-# p4a.commit = 957a3e5
+# این خط‌ها رو کاملاً حذف کن:
+# p4a.branch = ...
+# p4a.commit = ...
 
-p4a.branch = develop
+[buildozer]
+log_level = 2
+warn_on_root = 1
