@@ -16,9 +16,9 @@ fullscreen = 0
 icon.filename = %(source.dir)s/icon.png
 presplash.filename = %(source.dir)s/presplash.png
 
-android.api = 35
+android.api = 34
 android.minapi = 24
-android.ndk = 28c
+android.ndk = 25c
 android.ndk_api = 24
 android.archs = arm64-v8a
 
@@ -29,6 +29,7 @@ android.accept_sdk_license = True
 android.presplash_color = #FFFFFF
 
 p4a.branch = master
+p4a.commit = 957a3e5
 
 [buildozer]
 log_level = 2
