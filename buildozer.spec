@@ -35,3 +35,4 @@ p4a.commit = 957a3e5
 [buildozer]
 log_level = 2
 warn_on_root = 1
+recipe.freetype.url
