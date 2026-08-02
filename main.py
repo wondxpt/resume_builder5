@@ -41,7 +41,6 @@ LEVEL_OPTIONS = [
 ]
 
 
-# ---------- helpers ----------
 
 
 def make_field(hint_text, multiline=False):
@@ -109,7 +108,6 @@ def nav_row(back_action=None, next_text="Next", next_action=None):
     return row
 
 
-# ---------- screens ----------
 
 
 def build_template_screen(app):
@@ -817,11 +815,7 @@ def build_preview_screen(app):
         template_label.text = f"Template: {tpl['label']}"
 
         live_png = None
-        if d.full_name and d.email:
-            # Render the actual PDF (same template, same styling) and show it.
-            live_png = build_live_preview(
-                d.to_dict(), generate_resume_pdf, template=d.selected_template
-            )
+
 
         missing = []
         if not d.full_name:
