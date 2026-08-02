@@ -702,7 +702,7 @@ def create_european(pdf: ResumePDF, data: Any) -> None:
     _render_two_column_template(pdf, data, "creative_photo", with_photo=True)
 
 
-def generate_resume_pdf(data: Any, output_path: str) -> str:
+def generate_resume_pdf(data: Any, output_path: str, template=None) -> str:
     pdf = ResumePDF()
     template_key = _resolve_template_key(getattr(data, "selected_template", "classic"))
 
