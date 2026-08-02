@@ -8,7 +8,7 @@ source.include_exts = py,png,jpg,jpeg,kv,atlas,ttf,json
 
 version = 1.0.0
 
-requirements = python3,kivy==2.3.1,kivymd==1.2.0,fpdf2,pillow==10.4.0,plyer
+requirements = python3,kivy @ git+https://github.com/kivy/kivy.git,kivymd==1.2.0,fpdf2,pillow==10.4.0,plyer
 
 orientation = portrait
 fullscreen = 0
@@ -29,7 +29,6 @@ android.accept_sdk_license = True
 android.presplash_color = #FFFFFF
 
 p4a.branch = master
-p4a.commit = 957a3e5
 
 [buildozer]
 log_level = 2
