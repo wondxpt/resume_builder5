@@ -228,35 +228,34 @@ def build_photo_screen(app):
     form.add_widget(path_label)
 
     def open_chooser(instance):
-        chooser = FileChooserIconView(filters=["*.png", "*.jpg", "*.jpeg"])
-        popup = Popup(title="Select a photo", content=chooser, size_hint=(0.9, 0.9))
+    chooser = FileChooserIconView(filters=["*.png", "*.jpg", "*.jpeg"])
+    popup = Popup(title="Select a photo", content=chooser, size_hint=(0.9, 0.9))
 
-        def on_selection(inst, selection):
-            if selection:
-                chosen_path = selection[0]
-                app.data.set_photo(chosen_path)
-                preview.source = chosen_path
-                path_label.text = chosen_path
-                popup.dismiss()
+    def on_selection(inst, selection):
+        if selection:
+            chosen_path = selection[0]
+            app.data.set_photo(chosen_path)
+            preview.source = chosen_path
+            path_label.text = chosen_path
+            popup.dismiss()
 
-        chooser.bind(selection=on_selection)
-        popup.open()
+    chooser.bind(selection=on_selection)
+    popup.open()
 
-    choose_btn = MDRaisedButton(text="Choose Photo", size_hint_y=None, height=48)
-    choose_btn.bind(on_press=open_chooser)
-    form.add_widget(choose_btn)
+choose_btn = MDRaisedButton(text="Choose Photo", size_hint_y=None, height=48)
+choose_btn.bind(on_press=open_chooser)
+form.add_widget(choose_btn)
 
-        def clear_photo(instance):
-        app.data.set_photo("")
-        preview.source = ""
-        path_label.text = "No photo selected"
+def clear_photo(instance):
+    app.data.set_photo("")
+    preview.source = ""
+    path_label.text = "No photo selected"
 
-    clear_btn = MDFlatButton(
-        text="Remove Photo",
-        size_hint_y=None,
-        height=44
-    )
-
+clear_btn = MDFlatButton(
+    text="Remove Photo",
+    size_hint_y=None,
+    height=44
+)
     clear_btn.bind(on_press=clear_photo)
     form.add_widget(clear_btn)
     
