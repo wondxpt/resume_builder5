@@ -23,7 +23,6 @@ from kivy.uix.image import Image as KivyImage
 
 from resume_data import ResumeData
 from template_previews import get_preview_path
-from pdf_preview import build_live_preview
 
 Window.size = (400, 750)
 
