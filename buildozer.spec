@@ -29,7 +29,7 @@ android.accept_sdk_license = True
 android.presplash_color = #FFFFFF
 
 p4a.branch = master
-p4a.commit = 58d2114^
+p4a.commit = 957a3e5
 
 [buildozer]
 log_level = 2
