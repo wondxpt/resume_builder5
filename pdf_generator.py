@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import os
 import tempfile
-from datetime import datetime
-from typing import Any, Iterable, List, Sequence, Tuple
+from typing import Any, List, Tuple
 
 from fpdf import FPDF
 
@@ -683,4 +682,45 @@ def create_classic(pdf: ResumePDF, data: Any) -> None:
     _render_single_column_template(pdf, data, "classic")
 
 
-def create
+def create_canadian(pdf: ResumePDF, data: Any) -> None:
+    _render_single_column_template(pdf, data, "canadian")
+
+
+def create_corporate(pdf: ResumePDF, data: Any) -> None:
+    _render_single_column_template(pdf, data, "corporate")
+
+
+def create_modern(pdf: ResumePDF, data: Any) -> None:
+    _render_two_column_template(pdf, data, "modern", with_photo=False)
+
+
+def create_executive(pdf: ResumePDF, data: Any) -> None:
+    _render_single_column_template(pdf, data, "executive")
+
+
+def create_european(pdf: ResumePDF, data: Any) -> None:
+    _render_two_column_template(pdf, data, "creative_photo", with_photo=True)
+
+
+def generate_resume_pdf(data: Any, output_path: str) -> str:
+    pdf = ResumePDF()
+    template_key = _resolve_template_key(getattr(data, "selected_template", "classic"))
+
+    render_map = {
+        "classic": create_classic,
+        "canadian": create_canadian,
+        "corporate": create_corporate,
+        "modern": create_modern,
+        "executive": create_executive,
+        "creative_photo": create_european,
+    }
+
+    renderer = render_map.get(template_key, create_classic)
+    renderer(pdf, data)
+
+    directory = os.path.dirname(output_path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+
+    pdf.output(output_path)
+    return output_path
