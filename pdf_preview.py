@@ -15,11 +15,7 @@ app should fall back to the generic wireframe in template_previews.py.
 import os
 import tempfile
 
-try:
-    import fitz  # PyMuPDF
-    FITZ_AVAILABLE = True
-except ImportError:
-    FITZ_AVAILABLE = False
+FITZ_AVAILABLE = False
 
 _CACHE_DIR = os.path.join(tempfile.gettempdir(), "resume_live_previews")
 os.makedirs(_CACHE_DIR, exist_ok=True)
