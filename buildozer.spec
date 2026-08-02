@@ -20,7 +20,6 @@ android.api = 34
 android.minapi = 24
 android.ndk = 25c
 android.ndk_api = 24
-
 android.archs = arm64-v8a
 
 android.permissions = READ_MEDIA_IMAGES,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE
@@ -30,7 +29,6 @@ android.accept_sdk_license = True
 android.presplash_color = #FFFFFF
 
 p4a.branch = master
-p4a.commit = 2a5c8b7   
 
 [buildozer]
 log_level = 2
