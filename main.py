@@ -26,7 +26,9 @@ from template_previews import get_preview_path
 
 Window.size = (400, 750)
 
-OUTPUT_DIR = os.path.join(os.path.expanduser("~"), "Documents")
+from plyer import storagepath
+
+OUTPUT_DIR = storagepath.get_documents_dir()
 
 LANGUAGE_OPTIONS = ["English", "French", "German", "Spanish", "Persian", "Other"]
 LEVEL_OPTIONS = [
@@ -244,14 +246,20 @@ def build_photo_screen(app):
     choose_btn.bind(on_press=open_chooser)
     form.add_widget(choose_btn)
 
-    def clear_photo(instance):
+        def clear_photo(instance):
         app.data.set_photo("")
         preview.source = ""
         path_label.text = "No photo selected"
 
-    clear_btn = MDFlatButton(text="Remove Photo", size_hint_y=None, height=44)
+    clear_btn = MDFlatButton(
+        text="Remove Photo",
+        size_hint_y=None,
+        height=44
+    )
+
     clear_btn.bind(on_press=clear_photo)
     form.add_widget(clear_btn)
+    
 
     def go_back(instance):
         app.sm.current = "template"
@@ -366,7 +374,7 @@ def build_experience_screen(app):
         form.add_widget(f)
 
     editing_index = {"value": None}
-
+    
     def clear_fields():
         for f in [f_job_title, f_company, f_job_location, f_start, f_end, f_bullets]:
             f.text = ""
@@ -884,7 +892,7 @@ def build_preview_screen(app):
     return screen
 
 
-# ---------- app ----------
+
 class ResumeBuilderApp(MDApp):
     def build(self):
         self.title = "Canadian Resume Builder"
